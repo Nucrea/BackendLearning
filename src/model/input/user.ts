@@ -3,3 +3,7 @@ export interface IUserCreateInput {
     name: string
     password: string
 }
+
+export interface IUserUpdateInput {
+    name: string
+}

@@ -1,8 +1,8 @@
-import { App } from "./app"
+import { Server } from "./server"
 
 async function main() {
-    const app = new App()
-    await app.start()
+    const server = new Server()
+    await server.start()
 }
 
 main()
