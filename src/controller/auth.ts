@@ -7,10 +7,21 @@ export class AuthController {
         private authService: AuthService,
     ) {}
 
-    public async login(request: Request, response: Response) {
+    public async getTokens(request: Request, response: Response) {
         const { email, password } = request.body
 
         const result = await this.authService.getTokens(email, password)
+        if (result) {
+            response.status(StatusCodes.OK).send(result)
+        }
+
+        response.sendStatus(StatusCodes.BAD_REQUEST)
+    }
+
+    public async refreshTokens(request: Request, response: Response) {
+        const { refreshToken } = request.body
+
+        const result = await this.authService.refreshTokens(refreshToken)
         if (result) {
             response.status(StatusCodes.OK).send(result)
         }

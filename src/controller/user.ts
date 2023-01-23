@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { UserService } from "../service/user";
 
 export class UserController {
+    constructor(
+        private userService: UserService,
+    ){}
+
     public async createUser(request: Request, response: Response) {
         response.sendStatus(StatusCodes.NOT_IMPLEMENTED)
     }
