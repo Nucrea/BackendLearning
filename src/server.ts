@@ -11,16 +11,48 @@ import { TokenPayload } from './model/token'
 import { AuthController } from './controller/auth'
 import { UserController } from './controller/user'
 
+
 export class Server {
+    private getEnvConfig() {
+        const {
+            POSTGRES_URL, 
+            PASSWORD_HASH_SALT, 
+            ACCESS_TOKEN_PRIVATE_KEY, 
+            REFRESH_TOKEN_PRIVATE_KEY,
+            ACCESS_TOKEN_EXPIRE,
+            REFRESH_TOKEN_EXPIRE,
+        } = process.env
+
+        const vars = {
+            POSTGRES_URL: process.env.POSTGRES_URL,
+            PASSWORD_HASH_SALT: process.env.PASSWORD_HASH_SALT,
+            ACCESS_TOKEN_PRIVATE_KEY: process.env.ACCESS_TOKEN_PRIVATE_KEY,
+            REFRESH_TOKEN_PRIVATE_KEY: process.env.REFRESH_TOKEN_PRIVATE_KEY,
+            ACCESS_TOKEN_EXPIRE: parseInt(process.env.ACCESS_TOKEN_EXPIRE!),
+            REFRESH_TOKEN_EXPIRE: parseInt(process.env.REFRESH_TOKEN_EXPIRE!),
+        }
+
+        for (let key in Object.keys(vars)) {
+            const varsAny = vars as any
+            if (varsAny[key] === undefined) {
+                throw Error(`key ${key} is missing in list if environment variables`)
+            }
+        }
+
+        return vars
+    }
+
     public async start() {
+        const config = this.getEnvConfig()
+
         //prepare core
-        const pgClient = new Client('fdgf')
+        const pgClient = new Client(config.POSTGRES_URL)
         await pgClient.connect()
 
-        const cryptoRepo = new CryptoRepo('ff')
+        const cryptoRepo = new CryptoRepo(config.PASSWORD_HASH_SALT)
         const userRepo = new UserRepo(pgClient)
-        const accessTokenRepo = new TokenRepo<TokenPayload>('dfd', 10 * 60)
-        const refreshTokenRepo = new TokenRepo<TokenPayload>('dfd', 10 * 60)
+        const accessTokenRepo = new TokenRepo<TokenPayload>(config.ACCESS_TOKEN_PRIVATE_KEY, config.ACCESS_TOKEN_EXPIRE)
+        const refreshTokenRepo = new TokenRepo<TokenPayload>(config.REFRESH_TOKEN_PRIVATE_KEY, config.REFRESH_TOKEN_EXPIRE)
 
         const userService = new UserService(userRepo, cryptoRepo)
         const authService = new AuthService(accessTokenRepo, refreshTokenRepo, userRepo, cryptoRepo)
