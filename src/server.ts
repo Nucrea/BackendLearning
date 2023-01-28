@@ -14,25 +14,20 @@ import { UserController } from './controller/user'
 
 export class Server {
     private getEnvConfig() {
-        const {
-            POSTGRES_URL, 
-            PASSWORD_HASH_SALT, 
-            ACCESS_TOKEN_PRIVATE_KEY, 
-            REFRESH_TOKEN_PRIVATE_KEY,
-            ACCESS_TOKEN_EXPIRE,
-            REFRESH_TOKEN_EXPIRE,
-        } = process.env
-
         const vars = {
-            POSTGRES_URL: process.env.POSTGRES_URL,
-            PASSWORD_HASH_SALT: process.env.PASSWORD_HASH_SALT,
-            ACCESS_TOKEN_PRIVATE_KEY: process.env.ACCESS_TOKEN_PRIVATE_KEY,
-            REFRESH_TOKEN_PRIVATE_KEY: process.env.REFRESH_TOKEN_PRIVATE_KEY,
-            ACCESS_TOKEN_EXPIRE: parseInt(process.env.ACCESS_TOKEN_EXPIRE!),
-            REFRESH_TOKEN_EXPIRE: parseInt(process.env.REFRESH_TOKEN_EXPIRE!),
+            POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD!,
+            POSTGRES_USER: process.env.POSTGRES_USER!,
+            POSTGRES_DB: process.env.POSTGRES_DB!,
+            POSTGRES_URL: process.env.POSTGRES_URL!,
+            PASSWORD_HASH_SALT: process.env.PASSWORD_HASH_SALT!,
+            ACCESS_TOKEN_PRIVATE_KEY: process.env.ACCESS_TOKEN_PRIVATE_KEY!,
+            REFRESH_TOKEN_PRIVATE_KEY: process.env.REFRESH_TOKEN_PRIVATE_KEY!,
+            ACCESS_TOKEN_EXPIRE: parseInt(process.env.ACCESS_TOKEN_EXPIRE!)!,
+            REFRESH_TOKEN_EXPIRE: parseInt(process.env.REFRESH_TOKEN_EXPIRE!)!,
+            APP_PORT: parseInt(process.env.APP_PORT!)!,
         }
 
-        for (let key in Object.keys(vars)) {
+        for (let key of Object.keys(vars)) {
             const varsAny = vars as any
             if (varsAny[key] === undefined) {
                 throw Error(`key ${key} is missing in list if environment variables`)
@@ -74,5 +69,9 @@ export class Server {
         app.use('/user', userRouter)
         userRouter.post('/create', userController.createUser.bind(userController))
         userRouter.post('/delete', userController.deleteUser.bind(userController))
+        
+        app.listen(config.APP_PORT, () => {
+            console.log(`Server listening on port ${config.APP_PORT}`)
+        })
     }
 }
